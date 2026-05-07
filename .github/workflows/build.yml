@@ -2,6 +2,8 @@ name: Build and Release godot-cpp
 
 on:
   push:
+    tags:
+      - 'v*'
   workflow_dispatch: # Allows manual triggering from the Actions tab
 
 jobs:
@@ -58,7 +60,8 @@ jobs:
           mkdir -p sdk/bin
           cp bin/* sdk/bin/
           # 5. Zip it up so it's a single download
-          zip -r godot-cpp-ready-${{ matrix.platform }}.zip sdk/
+          tar -a -c -f godot-cpp-ready-${{ matrix.platform }}.zip sdk/
+
 
       - name: Upload Finished SDK
         uses: actions/upload-artifact@v4
