@@ -41,15 +41,31 @@ jobs:
       - name: Build godot-cpp
         shell: bash
         run: |
+          # 1. Compile the library and generate missing headers
           scons platform=${{ matrix.platform }} arch=${{ matrix.arch }} \
                 target=template_release generate_bindings=yes \
                 custom_api_file=extension_api.json -j2
 
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
+      - name: Create "Ready-to-Use" SDK
+        shell: bash
+        run: |
+          mkdir -p sdk/include
+          # 2. Copy the original core headers
+          cp -r include/* sdk/include/
+          # 3. Copy the NEWLY GENERATED headers from 'gen' folder
+          cp -r gen/include/* sdk/include/
+          # 4. Copy the compiled libraries (.lib, .a, or .dylib)
+          mkdir -p sdk/bin
+          cp bin/* sdk/bin/
+          # 5. Zip it up so it's a single download
+          zip -r godot-cpp-ready-${{ matrix.platform }}.zip sdk/
+
+      - name: Upload Finished SDK
+        uses: [actions/upload-artifact](https://github.com)@v4
         with:
-          name: godot-cpp-${{ matrix.platform }}-${{ matrix.arch }}
-          path: bin/*
+          name: godot-cpp-sdk-${{ matrix.platform }}
+          path: godot-cpp-ready-*.zip
+
 
   release:
     needs: build
