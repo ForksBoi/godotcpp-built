@@ -51,11 +51,10 @@ jobs:
           if [ "$LOCAL" != "$UPSTREAM" ]; then
             echo "Changes detected! Updating fork..."
             git merge upstream/master --no-edit
-            git push origin master
+            git push origin main
           else
             echo "Already up to date. No build needed today."
-            # Optional: You can stop the job here if you don't want to rebuild identical files
-            # exit 0
+            exit 0
           fi
       - name: Checkout code
         uses: actions/checkout@v4
