@@ -2,7 +2,13 @@ name: Build and Release godot-cpp
 
 on:
   push:
+    tags:
+      - 'v*'
   workflow_dispatch: # Allows manual triggering from the Actions tab
+
+permissions:
+  contents: write
+  actions: write
 
 jobs:
   build:
@@ -25,6 +31,32 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0 # Important for syncing
+
+      - name: Sync with Upstream
+        shell: bash
+        run: |
+          # 1. Add the official godot-cpp as a remote
+          git remote add upstream https://github.com/godotengine/godot-cpp
+          git fetch upstream
+
+          # 2. Check if we are behind the official master branch
+          LOCAL=$(git rev-parse HEAD)
+          UPSTREAM=$(git rev-parse upstream/master)
+
+          if [ "$LOCAL" != "$UPSTREAM" ]; then
+            echo "Changes detected! Updating fork..."
+            git merge upstream/master --no-edit
+            git push origin master
+          else
+            echo "Already up to date. No build needed today."
+            # Optional: You can stop the job here if you don't want to rebuild identical files
+            # exit 0
+          fi
       - name: Checkout code
         uses: actions/checkout@v4
         with:
