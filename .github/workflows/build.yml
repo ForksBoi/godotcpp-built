@@ -130,6 +130,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: godot-cpp-upstream-build
