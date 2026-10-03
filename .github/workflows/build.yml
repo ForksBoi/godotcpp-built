@@ -130,8 +130,6 @@ on:
 
 permissions:
   contents: write
-  actions: write
-  workflows: write
 
 concurrency:
   group: godot-cpp-upstream-build
@@ -421,7 +419,8 @@ jobs:
           set -euo pipefail
           git remote add upstream https://github.com/godotengine/godot-cpp.git
           git fetch --no-tags upstream "$UPSTREAM_REF"
-          git switch --force-create "$BRANCH" "$UPSTREAM_SHA"
+          git checkout --orphan "$BRANCH" "$UPSTREAM_SHA"
+          git rm -r --cached --ignore-unmatch .github/workflows
           cp "$RUNNER_TEMP/generated-api/extension_api.json" extension_api.json
           cp "$RUNNER_TEMP/generated-api/gdextension_interface.json" gdextension/gdextension_interface.json
           printf '%s\n' "$UPSTREAM_SHA" > .upstream-commit
